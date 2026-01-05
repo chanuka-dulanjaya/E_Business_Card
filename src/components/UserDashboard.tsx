@@ -1,0 +1,188 @@
+import { useState, useEffect } from 'react';
+import { Mail, Phone, Briefcase, Building2, User, Save } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { employeeApi } from '../lib/api';
+
+export default function UserDashboard() {
+  const { employee } = useAuth();
+  const [mobileNumber, setMobileNumber] = useState(employee?.mobileNumber || '');
+  const [profilePicture, setProfilePicture] = useState(employee?.profilePicture || '');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (employee) {
+      setMobileNumber(employee.mobileNumber || '');
+      setProfilePicture(employee.profilePicture || '');
+    }
+  }, [employee]);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    try {
+      await employeeApi.update(employee!.id, {
+        mobileNumber,
+        profilePicture,
+      });
+      setMessage('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setMessage('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!employee) return null;
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-12">
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
+              {employee.profilePicture ? (
+                <img
+                  src={employee.profilePicture}
+                  alt={employee.fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                  <User className="w-12 h-12 text-slate-400" />
+                </div>
+              )}
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-1">
+                {employee.fullName}
+              </h2>
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                  employee.role === 'admin'
+                    ? 'bg-white text-slate-900'
+                    : 'bg-slate-700 text-white'
+                }`}
+              >
+                {employee.role}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-100 p-3 rounded-lg">
+                <Mail className="w-5 h-5 text-slate-700" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 font-medium">Email</p>
+                <p className="text-slate-900">{employee.email}</p>
+              </div>
+            </div>
+
+            {employee.mobileNumber && (
+              <div className="flex items-start gap-4">
+                <div className="bg-slate-100 p-3 rounded-lg">
+                  <Phone className="w-5 h-5 text-slate-700" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Mobile</p>
+                  <p className="text-slate-900">{employee.mobileNumber}</p>
+                </div>
+              </div>
+            )}
+
+            {employee.department && (
+              <div className="flex items-start gap-4">
+                <div className="bg-slate-100 p-3 rounded-lg">
+                  <Building2 className="w-5 h-5 text-slate-700" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Department</p>
+                  <p className="text-slate-900">{employee.department}</p>
+                </div>
+              </div>
+            )}
+
+            {employee.position && (
+              <div className="flex items-start gap-4">
+                <div className="bg-slate-100 p-3 rounded-lg">
+                  <Briefcase className="w-5 h-5 text-slate-700" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Position</p>
+                  <p className="text-slate-900">{employee.position}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-slate-200 pt-8">
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">
+              Update Your Profile
+            </h3>
+
+            <form onSubmit={handleUpdate} className="space-y-6">
+              {message && (
+                <div
+                  className={`px-4 py-3 rounded-lg text-sm ${
+                    message.includes('success')
+                      ? 'bg-green-50 border border-green-200 text-green-700'
+                      : 'bg-red-50 border border-red-200 text-red-700'
+                  }`}
+                >
+                  {message}
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="mobile" className="block text-sm font-medium text-slate-700 mb-2">
+                  Mobile Number
+                </label>
+                <input
+                  id="mobile"
+                  type="tel"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="+1 234 567 8900"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="picture" className="block text-sm font-medium text-slate-700 mb-2">
+                  Profile Picture URL
+                </label>
+                <input
+                  id="picture"
+                  type="url"
+                  value={profilePicture}
+                  onChange={(e) => setProfilePicture(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="https://example.com/profile.jpg"
+                />
+                <p className="mt-2 text-xs text-slate-500">
+                  Enter the URL of your profile picture
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" />
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
