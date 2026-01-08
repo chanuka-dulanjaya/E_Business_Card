@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Download } from 'lucide-react';
+import { Download, ExternalLink } from 'lucide-react';
+import QRCode from 'qrcode';
 import type { Employee } from '../contexts/AuthContext';
 
 interface QRCodeDisplayProps {
@@ -12,85 +13,26 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
 
   useEffect(() => {
     generateQRCode();
-  }, [employee.id]);
+  }, [employee.id, profileUrl]);
 
-  const generateQRCode = () => {
+  const generateQRCode = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const size = 300;
-    canvas.width = size;
-    canvas.height = size;
-
-    const qrSize = 29;
-    const moduleSize = size / qrSize;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-
-    const qrData = generateQRMatrix(profileUrl, qrSize);
-
-    ctx.fillStyle = '#000000';
-    for (let y = 0; y < qrSize; y++) {
-      for (let x = 0; x < qrSize; x++) {
-        if (qrData[y][x]) {
-          ctx.fillRect(
-            x * moduleSize,
-            y * moduleSize,
-            moduleSize,
-            moduleSize
-          );
-        }
-      }
+    try {
+      // Generate a real, scannable QR code using qrcode library
+      await QRCode.toCanvas(canvas, profileUrl, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'H' // High error correction for better scanning
+      });
+    } catch (error) {
+      console.error('Error generating QR code:', error);
     }
-  };
-
-  const generateQRMatrix = (text: string, size: number): boolean[][] => {
-    const matrix: boolean[][] = Array(size).fill(null).map(() => Array(size).fill(false));
-
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      hash = ((hash << 5) - hash) + text.charCodeAt(i);
-      hash = hash & hash;
-    }
-
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x);
-    };
-
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        if (
-          (x < 8 && y < 8) ||
-          (x < 8 && y >= size - 8) ||
-          (x >= size - 8 && y < 8)
-        ) {
-          const inSquare = (x >= 0 && x < 7 && y >= 0 && y < 7) ||
-                          (x >= 0 && x < 7 && y >= size - 7 && y < size) ||
-                          (x >= size - 7 && x < size && y >= 0 && y < 7);
-
-          if (inSquare) {
-            const isBorder = x === 0 || x === 6 || y === 0 || y === 6 ||
-                           (x >= 0 && x < 7 && (y === size - 7 || y === size - 1)) ||
-                           (x >= size - 7 && x < size && (y === 0 || y === 6)) ||
-                           ((x === 0 || x === 6) && y >= size - 7 && y < size) ||
-                           ((x === size - 7 || x === size - 1) && y >= 0 && y < 7);
-            const isCenter = (x >= 2 && x <= 4 && y >= 2 && y <= 4) ||
-                           (x >= 2 && x <= 4 && y >= size - 5 && y <= size - 3) ||
-                           (x >= size - 5 && x <= size - 3 && y >= 2 && y <= 4);
-            matrix[y][x] = isBorder || isCenter;
-          }
-        } else {
-          matrix[y][x] = seededRandom(hash + y * size + x) > 0.5;
-        }
-      }
-    }
-
-    return matrix;
   };
 
   const handleDownload = () => {
@@ -99,9 +41,13 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
 
     const url = canvas.toDataURL('image/png');
     const link = document.createElement('a');
-    link.download = `${employee.fullName.replace(/\s+/g, '_')}_QR.png`;
+    link.download = `${employee.fullName.replace(/\s+/g, '_')}_BusinessCard_QR.png`;
     link.href = url;
     link.click();
+  };
+
+  const handleOpenProfile = () => {
+    window.open(profileUrl, '_blank');
   };
 
   return (
@@ -110,7 +56,7 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
         {employee.fullName}
       </h3>
       <p className="text-sm text-slate-600 mb-6">
-        Scan to view profile
+        Scan to view business card
       </p>
 
       <div className="bg-white p-4 rounded-xl border-2 border-slate-200 inline-block mb-6">
@@ -126,8 +72,16 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
           Download QR Code
         </button>
 
+        <button
+          onClick={handleOpenProfile}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-slate-900 border-2 border-slate-900 rounded-lg hover:bg-slate-50 transition-colors"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Preview Business Card
+        </button>
+
         <div className="bg-slate-50 rounded-lg p-3">
-          <p className="text-xs text-slate-600 mb-1">Profile URL</p>
+          <p className="text-xs text-slate-600 mb-1">Business Card URL</p>
           <p className="text-sm font-mono text-slate-900 break-all">
             {profileUrl}
           </p>

@@ -64,7 +64,12 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    logger.info('Login attempt', { email });
+    logger.info('Login attempt', {
+      email,
+      passwordLength: password?.length,
+      passwordFirstChar: password?.[0],
+      passwordLastChar: password?.[password.length - 1]
+    });
 
     // Validate input
     if (!email || !password) {

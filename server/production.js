@@ -51,11 +51,19 @@ app.get('/api/health', (req, res) => {
 
 // Serve static files from the React app (built frontend)
 const distPath = join(__dirname, '..', 'dist');
+console.log('📁 Serving static files from:', distPath);
+
 app.use(express.static(distPath));
 
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
-  res.sendFile(join(distPath, 'index.html'));
+  console.log('📄 Serving index.html for:', req.path);
+  res.sendFile(join(distPath, 'index.html'), (err) => {
+    if (err) {
+      console.error('Error serving index.html:', err);
+      res.status(500).send('Error loading application');
+    }
+  });
 });
 
 // Start server
