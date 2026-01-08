@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Employee from '../models/Employee.js';
 import { authenticate } from '../middleware/auth.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -63,27 +64,58 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    logger.info('Login attempt', { email });
+
+    // Validate input
+    if (!email || !password) {
+      logger.warn('Login failed: Missing credentials', { email });
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
+      logger.warn('Login failed: User not found', { email });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    logger.debug('User found', { email, userId: user._id.toString() });
 
     // Check password
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
+      logger.warn('Login failed: Invalid password', { email, userId: user._id.toString() });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    logger.debug('Password validated', { email, userId: user._id.toString() });
 
     // Find employee record
     const employee = await Employee.findOne({ userId: user._id });
     if (!employee) {
+      logger.error('Login failed: Employee record not found', {
+        email,
+        userId: user._id.toString()
+      });
       return res.status(404).json({ error: 'Employee record not found' });
     }
+
+    logger.debug('Employee record found', {
+      email,
+      userId: user._id.toString(),
+      employeeId: employee._id.toString(),
+      role: employee.role
+    });
 
     // Generate token
     const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, {
       expiresIn: '7d'
+    });
+
+    logger.info('Login successful', {
+      email,
+      userId: user._id.toString(),
+      role: employee.role
     });
 
     res.json({
@@ -104,7 +136,11 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error', {
+      error: error.message,
+      stack: error.stack,
+      email: req.body?.email
+    });
     res.status(500).json({ error: 'Login failed' });
   }
 });

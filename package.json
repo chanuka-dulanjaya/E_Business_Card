@@ -15,7 +15,8 @@
     "db:info": "node server/dbManagement.js info",
     "db:clear": "node server/dbManagement.js clear",
     "admin:create": "node server/createAdmin.js",
-    "admin:reset": "node server/resetPassword.js"
+    "admin:reset": "node server/resetPassword.js",
+    "debug:login": "node server/debugLogin.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
