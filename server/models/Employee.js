@@ -48,7 +48,7 @@ const employeeSchema = new mongoose.Schema({
 
 // Index for faster queries
 employeeSchema.index({ userId: 1 });
-employeeSchema.index({ email: 1 });
+// Note: email index is automatically created by unique: true constraint
 
 const Employee = mongoose.model('Employee', employeeSchema);
 
