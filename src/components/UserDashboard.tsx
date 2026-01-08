@@ -5,15 +5,21 @@ import { employeeApi } from '../lib/api';
 
 export default function UserDashboard() {
   const { employee } = useAuth();
+  const [fullName, setFullName] = useState(employee?.fullName || '');
   const [mobileNumber, setMobileNumber] = useState(employee?.mobileNumber || '');
   const [profilePicture, setProfilePicture] = useState(employee?.profilePicture || '');
+  const [department, setDepartment] = useState(employee?.department || '');
+  const [position, setPosition] = useState(employee?.position || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (employee) {
+      setFullName(employee.fullName || '');
       setMobileNumber(employee.mobileNumber || '');
       setProfilePicture(employee.profilePicture || '');
+      setDepartment(employee.department || '');
+      setPosition(employee.position || '');
     }
   }, [employee]);
 
@@ -24,14 +30,21 @@ export default function UserDashboard() {
 
     try {
       await employeeApi.update(employee!.id, {
+        fullName,
         mobileNumber,
         profilePicture,
+        department,
+        position,
       });
-      setMessage('Profile updated successfully!');
+      setMessage('Profile updated successfully! Please refresh the page to see changes.');
+
+      // Refresh the page after 2 seconds to show updated data
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error updating profile:', error);
       setMessage('Failed to update profile');
-    } finally {
       setLoading(false);
     }
   };
@@ -141,6 +154,21 @@ export default function UserDashboard() {
               )}
 
               <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
                 <label htmlFor="mobile" className="block text-sm font-medium text-slate-700 mb-2">
                   Mobile Number
                 </label>
@@ -151,6 +179,34 @@ export default function UserDashboard() {
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
                   placeholder="+1 234 567 8900"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="department" className="block text-sm font-medium text-slate-700 mb-2">
+                  Department
+                </label>
+                <input
+                  id="department"
+                  type="text"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="Engineering"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="position" className="block text-sm font-medium text-slate-700 mb-2">
+                  Position
+                </label>
+                <input
+                  id="position"
+                  type="text"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="Software Engineer"
                 />
               </div>
 
@@ -167,8 +223,21 @@ export default function UserDashboard() {
                   placeholder="https://example.com/profile.jpg"
                 />
                 <p className="mt-2 text-xs text-slate-500">
-                  Enter the URL of your profile picture
+                  Enter the URL of your profile picture (e.g., from LinkedIn, company directory)
                 </p>
+                {profilePicture && (
+                  <div className="mt-3">
+                    <p className="text-xs text-slate-600 mb-2">Preview:</p>
+                    <img
+                      src={profilePicture}
+                      alt="Profile preview"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-slate-200"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <button
