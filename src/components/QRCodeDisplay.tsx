@@ -11,10 +11,6 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const profileUrl = `${window.location.origin}/profile/${employee.id}`;
 
-  useEffect(() => {
-    generateQRCode();
-  }, [employee.id, profileUrl]);
-
   const generateQRCode = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -34,6 +30,11 @@ export default function QRCodeDisplay({ employee }: QRCodeDisplayProps) {
       console.error('Error generating QR code:', error);
     }
   };
+
+  useEffect(() => {
+    generateQRCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employee.id, profileUrl]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;

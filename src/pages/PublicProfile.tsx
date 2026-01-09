@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, Briefcase, Building2, User } from 'lucide-react';
+import { Mail, Phone, Briefcase, Building2, User, Download } from 'lucide-react';
 import { employeeApi } from '../lib/api';
 
 interface Employee {
@@ -29,6 +29,31 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const downloadVCard = () => {
+    if (!employee) return;
+
+    // Create vCard content
+    const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${employee.fullName}
+EMAIL:${employee.email}
+${employee.mobileNumber ? `TEL:${employee.mobileNumber}` : ''}
+${employee.position ? `TITLE:${employee.position}` : ''}
+${employee.department ? `ORG:${employee.department}` : ''}
+END:VCARD`;
+
+    // Create blob and download
+    const blob = new Blob([vCard], { type: 'text/vcard' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${employee.fullName.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -78,9 +103,14 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
               <div className="bg-slate-100 p-3 rounded-lg">
                 <Mail className="w-5 h-5 text-slate-700" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm text-slate-600 font-medium">Email</p>
-                <p className="text-slate-900">{employee.email}</p>
+                <a
+                  href={`mailto:${employee.email}`}
+                  className="text-slate-900 hover:text-blue-600 transition-colors underline"
+                >
+                  {employee.email}
+                </a>
               </div>
             </div>
 
@@ -89,9 +119,14 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                 <div className="bg-slate-100 p-3 rounded-lg">
                   <Phone className="w-5 h-5 text-slate-700" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-sm text-slate-600 font-medium">Mobile</p>
-                  <p className="text-slate-900">{employee.mobileNumber}</p>
+                  <a
+                    href={`tel:${employee.mobileNumber}`}
+                    className="text-slate-900 hover:text-blue-600 transition-colors underline"
+                  >
+                    {employee.mobileNumber}
+                  </a>
                 </div>
               </div>
             )}
@@ -119,6 +154,14 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                 </div>
               </div>
             )}
+
+            <button
+              onClick={downloadVCard}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors mt-8"
+            >
+              <Download className="w-5 h-5" />
+              Save to Contacts
+            </button>
           </div>
         </div>
       </div>
