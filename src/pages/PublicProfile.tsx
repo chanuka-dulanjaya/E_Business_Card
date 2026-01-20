@@ -31,18 +31,70 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
     }
   };
 
-  const downloadVCard = () => {
+  const downloadVCard = async () => {
     if (!employee) return;
 
+    // Build photo line for vCard if profile picture exists
+    let photoLine = '';
+    if (employee.profilePicture) {
+      if (employee.profilePicture.startsWith('data:')) {
+        // Base64 image - extract the base64 data and type
+        const matches = employee.profilePicture.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/);
+        if (matches) {
+          const imageType = matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG';
+          const base64Data = matches[2];
+          photoLine = `PHOTO;ENCODING=b;TYPE=${imageType}:${base64Data}`;
+        }
+      } else {
+        // URL - try to fetch and convert to base64
+        try {
+          const response = await fetch(employee.profilePicture);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onloadend = () => {
+              const result = reader.result as string;
+              const matches = result.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/);
+              if (matches) {
+                const imageType = matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG';
+                const base64Data = matches[2];
+                resolve(`PHOTO;ENCODING=b;TYPE=${imageType}:${base64Data}`);
+              } else {
+                resolve('');
+              }
+            };
+            reader.readAsDataURL(blob);
+          });
+          photoLine = await base64Promise;
+        } catch (error) {
+          console.error('Failed to fetch profile picture for vCard:', error);
+        }
+      }
+    }
+
     // Create vCard content
-    const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${employee.fullName}
-EMAIL:${employee.email}
-${employee.mobileNumber ? `TEL:${employee.mobileNumber}` : ''}
-${employee.position ? `TITLE:${employee.position}` : ''}
-${employee.department ? `ORG:${employee.department}` : ''}
-END:VCARD`;
+    const vCardLines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${employee.fullName}`,
+      `EMAIL:${employee.email}`,
+    ];
+
+    if (employee.mobileNumber) {
+      vCardLines.push(`TEL:${employee.mobileNumber}`);
+    }
+    if (employee.position) {
+      vCardLines.push(`TITLE:${employee.position}`);
+    }
+    if (employee.department) {
+      vCardLines.push(`ORG:${employee.department}`);
+    }
+    if (photoLine) {
+      vCardLines.push(photoLine);
+    }
+    vCardLines.push('END:VCARD');
+
+    const vCard = vCardLines.join('\n');
 
     // Create blob and download
     const blob = new Blob([vCard], { type: 'text/vcard' });
