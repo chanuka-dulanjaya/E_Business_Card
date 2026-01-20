@@ -137,11 +137,22 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
           <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-12 text-center">
             <div className="w-32 h-32 mx-auto mb-4 rounded-full border-4 border-white overflow-hidden bg-white">
               {employee.profilePicture ? (
-                <img
-                  src={employee.profilePicture}
-                  alt={employee.fullName}
-                  className="w-full h-full object-cover"
-                />
+                <>
+                  <img
+                    src={employee.profilePicture}
+                    alt={employee.fullName}
+                    className="w-full h-full object-cover"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (placeholder) placeholder.style.display = 'flex';
+                    }}
+                  />
+                  <div className="w-full h-full items-center justify-center bg-slate-100 hidden">
+                    <User className="w-16 h-16 text-slate-400" />
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-slate-100">
                   <User className="w-16 h-16 text-slate-400" />

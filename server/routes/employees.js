@@ -120,20 +120,19 @@ router.put('/:id', authenticate, async (req, res) => {
       return res.status(403).json({ error: 'Permission denied' });
     }
 
-    // If user (non-admin), only allow updating mobile number and profile picture
-    if (!isAdmin && isOwnProfile) {
-      const { mobileNumber, profilePicture } = req.body;
-      employee.mobileNumber = mobileNumber !== undefined ? mobileNumber : employee.mobileNumber;
-      employee.profilePicture = profilePicture !== undefined ? profilePicture : employee.profilePicture;
-    } else {
-      // Admin can update everything
-      const { fullName, role, mobileNumber, profilePicture, department, position } = req.body;
-      employee.fullName = fullName !== undefined ? fullName : employee.fullName;
-      employee.role = role !== undefined ? role : employee.role;
-      employee.mobileNumber = mobileNumber !== undefined ? mobileNumber : employee.mobileNumber;
-      employee.profilePicture = profilePicture !== undefined ? profilePicture : employee.profilePicture;
-      employee.department = department !== undefined ? department : employee.department;
-      employee.position = position !== undefined ? position : employee.position;
+    // Users can update their own profile fields (except role)
+    // Admins can update everything including role
+    const { fullName, role, mobileNumber, profilePicture, department, position } = req.body;
+
+    employee.fullName = fullName !== undefined ? fullName : employee.fullName;
+    employee.mobileNumber = mobileNumber !== undefined ? mobileNumber : employee.mobileNumber;
+    employee.profilePicture = profilePicture !== undefined ? profilePicture : employee.profilePicture;
+    employee.department = department !== undefined ? department : employee.department;
+    employee.position = position !== undefined ? position : employee.position;
+
+    // Only admin can change role
+    if (isAdmin && role !== undefined) {
+      employee.role = role;
     }
 
     await employee.save();
