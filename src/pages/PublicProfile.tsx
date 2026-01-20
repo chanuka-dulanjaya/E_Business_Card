@@ -134,37 +134,54 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-12 text-center">
-            <div className="w-32 h-32 mx-auto mb-4 rounded-full border-4 border-white overflow-hidden bg-white">
-              {employee.profilePicture ? (
-                <>
-                  <img
-                    src={employee.profilePicture}
-                    alt={employee.fullName}
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
-                      if (placeholder) placeholder.style.display = 'flex';
-                    }}
-                  />
-                  <div className="w-full h-full items-center justify-center bg-slate-100 hidden">
-                    <User className="w-16 h-16 text-slate-400" />
-                  </div>
-                </>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-slate-100">
+          {/* Header with cover image background */}
+          <div
+            className="relative px-8 py-12"
+            style={{
+              backgroundImage: 'url(/cover.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/50"></div>
+
+            {/* Content - Right aligned profile picture */}
+            <div className="relative flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  {employee.fullName}
+                </h1>
+                {employee.position && (
+                  <p className="text-slate-200 text-lg">{employee.position}</p>
+                )}
+              </div>
+
+              {/* Profile picture - Right aligned */}
+              <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg flex-shrink-0 ml-6">
+                <img
+                  src={employee.profilePicture || ''}
+                  alt={employee.fullName}
+                  className={`w-full h-full object-cover ${!employee.profilePicture ? 'hidden' : ''}`}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const placeholder = document.getElementById('profile-placeholder');
+                    if (placeholder) placeholder.style.display = 'flex';
+                  }}
+                  onLoad={(e) => {
+                    e.currentTarget.style.display = 'block';
+                    const placeholder = document.getElementById('profile-placeholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                  }}
+                />
+                <div
+                  id="profile-placeholder"
+                  className={`w-full h-full flex items-center justify-center bg-slate-100 ${employee.profilePicture ? 'hidden' : ''}`}
+                >
                   <User className="w-16 h-16 text-slate-400" />
                 </div>
-              )}
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              {employee.fullName}
-            </h1>
-            {employee.position && (
-              <p className="text-slate-300 text-lg">{employee.position}</p>
-            )}
           </div>
 
           <div className="px-8 py-8 space-y-6">

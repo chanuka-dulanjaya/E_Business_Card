@@ -57,20 +57,25 @@ export default function UserDashboard() {
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-12">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
-              {profilePicture ? (
-                <img
-                  src={profilePicture}
-                  alt={fullName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // If image fails to load, show placeholder
-                    e.currentTarget.style.display = 'none';
-                    const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (placeholder) placeholder.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div className={`w-full h-full flex items-center justify-center bg-slate-100 ${profilePicture ? 'hidden' : ''}`}>
+              <img
+                src={profilePicture || ''}
+                alt={fullName}
+                className={`w-full h-full object-cover ${!profilePicture ? 'hidden' : ''}`}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const placeholder = document.getElementById('user-profile-placeholder');
+                  if (placeholder) placeholder.style.display = 'flex';
+                }}
+                onLoad={(e) => {
+                  e.currentTarget.style.display = 'block';
+                  const placeholder = document.getElementById('user-profile-placeholder');
+                  if (placeholder) placeholder.style.display = 'none';
+                }}
+              />
+              <div
+                id="user-profile-placeholder"
+                className={`w-full h-full flex items-center justify-center bg-slate-100 ${profilePicture ? 'hidden' : ''}`}
+              >
                 <User className="w-12 h-12 text-slate-400" />
               </div>
             </div>
