@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, Briefcase, Building2, User, Download } from 'lucide-react';
+import { Mail, Phone, Briefcase, MapPin, User, Download } from 'lucide-react';
 import { employeeApi } from '../lib/api';
 
 interface Employee {
@@ -8,8 +8,8 @@ interface Employee {
   fullName: string;
   mobileNumber: string | null;
   profilePicture: string | null;
-  department: string | null;
   position: string | null;
+  address: string | null;
 }
 
 export default function PublicProfile({ employeeId }: { employeeId: string }) {
@@ -88,8 +88,8 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
     if (employee.position) {
       vCard += `TITLE:${employee.position}\r\n`;
     }
-    if (employee.department) {
-      vCard += `ORG:${employee.department}\r\n`;
+    if (employee.address) {
+      vCard += `ADR:;;${employee.address};;;;\r\n`;
     }
     if (photoData) {
       // Use proper vCard 3.0 photo format with line folding (75 char lines)
@@ -154,19 +154,25 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
             <div className="relative flex items-start justify-between">
               {/* Logo and tagline - Left aligned */}
               <div className="flex-shrink-0">
-                <img
-                  src="/logo_OD.png"
-                  alt="Company Logo"
-                  className="h-24 w-auto mb-3"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+                <a
+                  href="https://overdimetechnologies.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="/logo_OD.png"
+                    alt="Company Logo"
+                    className="h-24 w-auto mb-3 cursor-pointer hover:opacity-90 transition-opacity"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </a>
                 <p
                   className="text-white text-[16px]"
                   style={{ fontFamily: 'Calibri, sans-serif' }}
                 >
-                  Let's bring your<br />ideas to life
+                  Supporting Your <br />Digitization Journey
                 </p>
               </div>
 
@@ -241,18 +247,6 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
               </div>
             )}
 
-            {employee.department && (
-              <div className="flex items-start gap-4">
-                <div className="bg-slate-100 p-3 rounded-lg">
-                  <Building2 className="w-5 h-5 text-slate-700" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Department</p>
-                  <p className="text-slate-900">{employee.department}</p>
-                </div>
-              </div>
-            )}
-
             {employee.position && (
               <div className="flex items-start gap-4">
                 <div className="bg-slate-100 p-3 rounded-lg">
@@ -261,6 +255,18 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                 <div>
                   <p className="text-sm text-slate-600 font-medium">Position</p>
                   <p className="text-slate-900">{employee.position}</p>
+                </div>
+              </div>
+            )}
+
+            {employee.address && (
+              <div className="flex items-start gap-4">
+                <div className="bg-slate-100 p-3 rounded-lg">
+                  <MapPin className="w-5 h-5 text-slate-700" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Address</p>
+                  <p className="text-slate-900">{employee.address}</p>
                 </div>
               </div>
             )}

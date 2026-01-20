@@ -120,18 +120,6 @@ export default function UserDashboard() {
               </div>
             )}
 
-            {employee.department && (
-              <div className="flex items-start gap-4">
-                <div className="bg-slate-100 p-3 rounded-lg">
-                  <Building2 className="w-5 h-5 text-slate-700" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Department</p>
-                  <p className="text-slate-900">{employee.department}</p>
-                </div>
-              </div>
-            )}
-
             {employee.position && (
               <div className="flex items-start gap-4">
                 <div className="bg-slate-100 p-3 rounded-lg">
@@ -193,20 +181,6 @@ export default function UserDashboard() {
               </div>
 
               <div>
-                <label htmlFor="department" className="block text-sm font-medium text-slate-700 mb-2">
-                  Department
-                </label>
-                <input
-                  id="department"
-                  type="text"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                  placeholder="Engineering"
-                />
-              </div>
-
-              <div>
                 <label htmlFor="position" className="block text-sm font-medium text-slate-700 mb-2">
                   Position
                 </label>
@@ -217,6 +191,20 @@ export default function UserDashboard() {
                   onChange={(e) => setPosition(e.target.value)}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
                   placeholder="Software Engineer"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-2">
+                  Address
+                </label>
+                <textarea
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="123 Main St, City, Country"
                 />
               </div>
 
