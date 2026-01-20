@@ -12,8 +12,6 @@ export default function UserDashboard() {
   const [position, setPosition] = useState(employee?.position || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (employee) {
@@ -24,44 +22,6 @@ export default function UserDashboard() {
       setPosition(employee.position || '');
     }
   }, [employee]);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    if (!validTypes.includes(file.type)) {
-      setMessage('Please upload a valid image file (JPEG or PNG)');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-    if (file.size > maxSize) {
-      setMessage('Image size should be less than 5MB');
-      return;
-    }
-
-    setUploadingImage(true);
-    setMessage('');
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setProfilePicture(base64String);
-      setImagePreview(base64String);
-      setUploadingImage(false);
-      setMessage('Image uploaded successfully! Click "Save Changes" to update your profile.');
-    };
-
-    reader.onerror = () => {
-      setMessage('Failed to read image file. Please try again.');
-      setUploadingImage(false);
-    };
-
-    reader.readAsDataURL(file);
-  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,66 +216,25 @@ export default function UserDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Profile Picture
+                <label htmlFor="picture" className="block text-sm font-medium text-slate-700 mb-2">
+                  Profile Picture URL
                 </label>
-
-                {/* File Upload Option */}
-                <div className="mb-4">
-                  <label
-                    htmlFor="imageUpload"
-                    className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-slate-400 transition-colors cursor-pointer bg-slate-50 hover:bg-slate-100"
-                  >
-                    <div className="text-center">
-                      <p className="text-sm text-slate-600">
-                        {uploadingImage ? 'Uploading...' : 'Click to upload an image (JPEG or PNG)'}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Max file size: 5MB
-                      </p>
-                    </div>
-                  </label>
-                  <input
-                    id="imageUpload"
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                    className="hidden"
-                  />
-                </div>
-
-                {/* URL Input Option */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200"></div>
-                  </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="px-2 bg-white text-slate-500">OR</span>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <input
-                    id="picture"
-                    type="url"
-                    value={profilePicture.startsWith('data:') ? '' : profilePicture}
-                    onChange={(e) => setProfilePicture(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-                    placeholder="https://example.com/profile.jpg"
-                    disabled={uploadingImage}
-                  />
-                  <p className="mt-2 text-xs text-slate-500">
-                    Enter the URL of your profile picture
-                  </p>
-                </div>
-
-                {/* Image Preview */}
-                {(profilePicture || imagePreview) && (
-                  <div className="mt-4">
+                <input
+                  id="picture"
+                  type="url"
+                  value={profilePicture}
+                  onChange={(e) => setProfilePicture(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="https://example.com/profile.jpg"
+                />
+                <p className="mt-2 text-xs text-slate-500">
+                  Enter the URL of your profile picture
+                </p>
+                {profilePicture && (
+                  <div className="mt-3">
                     <p className="text-xs text-slate-600 mb-2">Preview:</p>
                     <img
-                      src={imagePreview || profilePicture}
+                      src={profilePicture}
                       alt="Profile preview"
                       className="w-24 h-24 rounded-full object-cover border-2 border-slate-200"
                       onError={(e) => {
