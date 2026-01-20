@@ -16,8 +16,8 @@ export default function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
     role: 'user' as 'admin' | 'user',
     mobileNumber: '',
     profilePicture: '',
-    department: '',
     position: '',
+    address: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,8 +31,8 @@ export default function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
         role: employee.role as 'admin' | 'user',
         mobileNumber: employee.mobileNumber || '',
         profilePicture: employee.profilePicture || '',
-        department: employee.department || '',
         position: employee.position || '',
+        address: employee.address || '',
       });
     }
   }, [employee]);
@@ -49,8 +49,8 @@ export default function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
           role: formData.role,
           mobileNumber: formData.mobileNumber,
           profilePicture: formData.profilePicture,
-          department: formData.department,
           position: formData.position,
+          address: formData.address,
         });
       } else {
         await employeeApi.create({
@@ -60,8 +60,8 @@ export default function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
           role: formData.role,
           mobileNumber: formData.mobileNumber,
           profilePicture: formData.profilePicture,
-          department: formData.department,
           position: formData.position,
+          address: formData.address,
         });
       }
 
@@ -183,13 +183,14 @@ export default function EmployeeForm({ employee, onClose }: EmployeeFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Department
+                Address
               </label>
               <input
                 type="text"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                placeholder="123 Main St, City, Country"
               />
             </div>
 

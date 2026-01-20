@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, Briefcase, MapPin, User, Download } from 'lucide-react';
+import { Mail, Phone, User, Download } from 'lucide-react';
 import { employeeApi } from '../lib/api';
 
 interface Employee {
@@ -152,8 +152,8 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
 
             {/* Content - Logo left, Profile right */}
             <div className="relative flex items-start justify-between">
-              {/* Logo and tagline - Left aligned */}
-              <div className="flex-shrink-0">
+              {/* Logo and tagline - Left aligned (1/3 width for mobile) */}
+              <div className="flex-shrink-0 w-1/3 min-w-[120px]">
                 <a
                   href="https://overdimetechnologies.com/"
                   target="_blank"
@@ -162,24 +162,32 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                   <img
                     src="/logo_OD.png"
                     alt="Company Logo"
-                    className="h-24 w-auto mb-3 cursor-pointer hover:opacity-90 transition-opacity"
+                    className="h-20 md:h-24 w-auto mb-3 cursor-pointer hover:opacity-90 transition-opacity"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 </a>
                 <p
-                  className="text-white text-[16px]"
+                  className="text-white text-[14px] md:text-[16px]"
                   style={{ fontFamily: 'Calibri, sans-serif' }}
                 >
                   Supporting Your <br />Digitization Journey
                 </p>
+                {employee.address && (
+                  <p
+                    className="text-slate-300 text-[11px] md:text-[12px] mt-2"
+                    style={{ fontFamily: 'Calibri, sans-serif' }}
+                  >
+                    {employee.address}
+                  </p>
+                )}
               </div>
 
               {/* Profile info - Right aligned */}
               <div className="flex flex-col items-end text-right">
                 {/* Profile picture */}
-                <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg mb-4">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg mb-4">
                   <img
                     src={employee.profilePicture || ''}
                     alt={employee.fullName}
@@ -199,16 +207,16 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                     id="profile-placeholder"
                     className={`w-full h-full flex items-center justify-center bg-slate-100 ${employee.profilePicture ? 'hidden' : ''}`}
                   >
-                    <User className="w-16 h-16 text-slate-400" />
+                    <User className="w-12 h-12 md:w-16 md:h-16 text-slate-400" />
                   </div>
                 </div>
 
                 {/* Name and Position */}
-                <h1 className="text-3xl font-bold text-white mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
                   {employee.fullName}
                 </h1>
                 {employee.position && (
-                  <p className="text-slate-200 text-lg">{employee.position}</p>
+                  <p className="text-slate-200 text-base md:text-lg">{employee.position}</p>
                 )}
               </div>
             </div>
@@ -243,30 +251,6 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
                   >
                     {employee.mobileNumber}
                   </a>
-                </div>
-              </div>
-            )}
-
-            {employee.position && (
-              <div className="flex items-start gap-4">
-                <div className="bg-slate-100 p-3 rounded-lg">
-                  <Briefcase className="w-5 h-5 text-slate-700" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Position</p>
-                  <p className="text-slate-900">{employee.position}</p>
-                </div>
-              </div>
-            )}
-
-            {employee.address && (
-              <div className="flex items-start gap-4">
-                <div className="bg-slate-100 p-3 rounded-lg">
-                  <MapPin className="w-5 h-5 text-slate-700" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Address</p>
-                  <p className="text-slate-900">{employee.address}</p>
                 </div>
               </div>
             )}

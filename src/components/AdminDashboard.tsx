@@ -105,8 +105,8 @@ export default function AdminDashboard() {
             {employee.position && (
               <p className="text-sm text-slate-500 mb-1">{employee.position}</p>
             )}
-            {employee.department && (
-              <p className="text-xs text-slate-400">{employee.department}</p>
+            {employee.address && (
+              <p className="text-xs text-slate-400">{employee.address}</p>
             )}
 
             <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">

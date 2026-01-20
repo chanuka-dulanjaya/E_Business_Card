@@ -14,8 +14,8 @@ interface Employee {
   role: string;
   mobileNumber: string | null;
   profilePicture: string | null;
-  department: string | null;
   position: string | null;
+  address: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -50,6 +50,13 @@ export const authApi = {
   getCurrentUser: async () => {
     return fetchWithAuth('/auth/me');
   },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    return fetchWithAuth('/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  },
 };
 
 // Employee API
@@ -70,8 +77,8 @@ export const employeeApi = {
     role?: string;
     mobileNumber?: string;
     profilePicture?: string;
-    department?: string;
     position?: string;
+    address?: string;
   }) => {
     return fetchWithAuth('/employees', {
       method: 'POST',
@@ -84,8 +91,8 @@ export const employeeApi = {
     role?: string;
     mobileNumber?: string;
     profilePicture?: string;
-    department?: string;
     position?: string;
+    address?: string;
   }) => {
     return fetchWithAuth(`/employees/${id}`, {
       method: 'PUT',

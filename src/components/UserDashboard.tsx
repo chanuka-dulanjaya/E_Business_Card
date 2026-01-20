@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Mail, Phone, Briefcase, MapPin, User, Save } from 'lucide-react';
+import { Mail, Phone, Briefcase, User, Save, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { employeeApi } from '../lib/api';
+import { employeeApi, authApi } from '../lib/api';
 
 export default function UserDashboard() {
   const { employee } = useAuth();
@@ -12,6 +12,11 @@ export default function UserDashboard() {
   const [address, setAddress] = useState(employee?.address || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
 
   useEffect(() => {
     if (employee) {
@@ -46,6 +51,41 @@ export default function UserDashboard() {
       console.error('Error updating profile:', error);
       setMessage('Failed to update profile. Please try again.');
       setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordLoading(true);
+    setPasswordMessage('');
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage('New passwords do not match.');
+      setPasswordLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordMessage('New password must be at least 6 characters.');
+      setPasswordLoading(false);
+      return;
+    }
+
+    try {
+      await authApi.changePassword(currentPassword, newPassword);
+      setPasswordMessage('Password changed successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: unknown) {
+      console.error('Error changing password:', error);
+      if (error instanceof Error) {
+        setPasswordMessage(error.message);
+      } else {
+        setPasswordMessage('Failed to change password. Please try again.');
+      }
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -245,6 +285,82 @@ export default function UserDashboard() {
               >
                 <Save className="w-4 h-4" />
                 {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+
+          <div className="border-t border-slate-200 pt-8">
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">
+              Change Password
+            </h3>
+
+            <form onSubmit={handlePasswordChange} className="space-y-6">
+              {passwordMessage && (
+                <div
+                  className={`px-4 py-3 rounded-lg text-sm ${
+                    passwordMessage.includes('successfully')
+                      ? 'bg-green-50 border border-green-200 text-green-700'
+                      : 'bg-red-50 border border-red-200 text-red-700'
+                  }`}
+                >
+                  {passwordMessage}
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-slate-700 mb-2">
+                  Current Password
+                </label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium text-slate-700 mb-2">
+                  New Password
+                </label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="Enter new password (min 6 characters)"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Lock className="w-4 h-4" />
+                {passwordLoading ? 'Changing Password...' : 'Change Password'}
               </button>
             </form>
           </div>
