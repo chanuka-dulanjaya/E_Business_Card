@@ -18,8 +18,8 @@ router.get('/', authenticate, async (req, res) => {
       role: emp.role,
       mobileNumber: emp.mobileNumber,
       profilePicture: emp.profilePicture,
-      department: emp.department,
       position: emp.position,
+      address: emp.address,
       createdAt: emp.createdAt,
       updatedAt: emp.updatedAt
     }));
@@ -46,8 +46,8 @@ router.get('/:id', async (req, res) => {
       fullName: employee.fullName,
       mobileNumber: employee.mobileNumber,
       profilePicture: employee.profilePicture,
-      department: employee.department,
-      position: employee.position
+      position: employee.position,
+      address: employee.address
     });
   } catch (error) {
     console.error('Get employee error:', error);
@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
 // Create employee (admin only)
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { email, password, fullName, role, mobileNumber, profilePicture, department, position } = req.body;
+    const { email, password, fullName, role, mobileNumber, profilePicture, position, address } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -78,8 +78,8 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
       role: role || 'user',
       mobileNumber,
       profilePicture,
-      department,
-      position
+      position,
+      address
     });
     await employee.save();
 
@@ -91,8 +91,8 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
       role: employee.role,
       mobileNumber: employee.mobileNumber,
       profilePicture: employee.profilePicture,
-      department: employee.department,
       position: employee.position,
+      address: employee.address,
       createdAt: employee.createdAt,
       updatedAt: employee.updatedAt
     });
@@ -122,13 +122,13 @@ router.put('/:id', authenticate, async (req, res) => {
 
     // Users can update their own profile fields (except role)
     // Admins can update everything including role
-    const { fullName, role, mobileNumber, profilePicture, department, position } = req.body;
+    const { fullName, role, mobileNumber, profilePicture, position, address } = req.body;
 
     employee.fullName = fullName !== undefined ? fullName : employee.fullName;
     employee.mobileNumber = mobileNumber !== undefined ? mobileNumber : employee.mobileNumber;
     employee.profilePicture = profilePicture !== undefined ? profilePicture : employee.profilePicture;
-    employee.department = department !== undefined ? department : employee.department;
     employee.position = position !== undefined ? position : employee.position;
+    employee.address = address !== undefined ? address : employee.address;
 
     // Only admin can change role
     if (isAdmin && role !== undefined) {
@@ -145,8 +145,8 @@ router.put('/:id', authenticate, async (req, res) => {
       role: employee.role,
       mobileNumber: employee.mobileNumber,
       profilePicture: employee.profilePicture,
-      department: employee.department,
       position: employee.position,
+      address: employee.address,
       createdAt: employee.createdAt,
       updatedAt: employee.updatedAt
     });

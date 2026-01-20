@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Phone, Briefcase, Building2, User, Save } from 'lucide-react';
+import { Mail, Phone, Briefcase, MapPin, User, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { employeeApi } from '../lib/api';
 
@@ -8,8 +8,8 @@ export default function UserDashboard() {
   const [fullName, setFullName] = useState(employee?.fullName || '');
   const [mobileNumber, setMobileNumber] = useState(employee?.mobileNumber || '');
   const [profilePicture, setProfilePicture] = useState(employee?.profilePicture || '');
-  const [department, setDepartment] = useState(employee?.department || '');
   const [position, setPosition] = useState(employee?.position || '');
+  const [address, setAddress] = useState(employee?.address || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -18,8 +18,8 @@ export default function UserDashboard() {
       setFullName(employee.fullName || '');
       setMobileNumber(employee.mobileNumber || '');
       setProfilePicture(employee.profilePicture || '');
-      setDepartment(employee.department || '');
       setPosition(employee.position || '');
+      setAddress(employee.address || '');
     }
   }, [employee]);
 
@@ -33,8 +33,8 @@ export default function UserDashboard() {
         fullName,
         mobileNumber,
         profilePicture,
-        department,
         position,
+        address,
       });
       setMessage('Profile updated successfully! Refreshing...');
 

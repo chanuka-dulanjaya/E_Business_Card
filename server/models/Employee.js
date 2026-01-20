@@ -32,12 +32,12 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  department: {
+  position: {
     type: String,
     trim: true,
     default: null
   },
-  position: {
+  address: {
     type: String,
     trim: true,
     default: null
