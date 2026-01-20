@@ -34,70 +34,76 @@ export default function PublicProfile({ employeeId }: { employeeId: string }) {
   const downloadVCard = async () => {
     if (!employee) return;
 
-    // Build photo line for vCard if profile picture exists
-    let photoLine = '';
-    if (employee.profilePicture) {
+    // Helper function to get base64 photo data
+    const getPhotoBase64 = async (): Promise<{ base64: string; type: string } | null> => {
+      if (!employee.profilePicture) return null;
+
       if (employee.profilePicture.startsWith('data:')) {
         // Base64 image - extract the base64 data and type
-        const matches = employee.profilePicture.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/);
+        const matches = employee.profilePicture.match(/^data:image\/(jpeg|jpg|png|gif|webp);base64,(.+)$/i);
         if (matches) {
-          const imageType = matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG';
-          const base64Data = matches[2];
-          photoLine = `PHOTO;ENCODING=b;TYPE=${imageType}:${base64Data}`;
+          return {
+            type: matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG',
+            base64: matches[2]
+          };
         }
       } else {
         // URL - try to fetch and convert to base64
         try {
           const response = await fetch(employee.profilePicture);
           const blob = await response.blob();
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve) => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
             reader.onloadend = () => {
               const result = reader.result as string;
-              const matches = result.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/);
+              const matches = result.match(/^data:image\/(jpeg|jpg|png|gif|webp);base64,(.+)$/i);
               if (matches) {
-                const imageType = matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG';
-                const base64Data = matches[2];
-                resolve(`PHOTO;ENCODING=b;TYPE=${imageType}:${base64Data}`);
+                resolve({
+                  type: matches[1].toUpperCase() === 'PNG' ? 'PNG' : 'JPEG',
+                  base64: matches[2]
+                });
               } else {
-                resolve('');
+                resolve(null);
               }
             };
+            reader.onerror = () => resolve(null);
             reader.readAsDataURL(blob);
           });
-          photoLine = await base64Promise;
         } catch (error) {
           console.error('Failed to fetch profile picture for vCard:', error);
+          return null;
         }
       }
-    }
+      return null;
+    };
 
-    // Create vCard content
-    const vCardLines = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `FN:${employee.fullName}`,
-      `EMAIL:${employee.email}`,
-    ];
+    const photoData = await getPhotoBase64();
+
+    // Create vCard content with proper line folding for photo
+    let vCard = `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:${employee.fullName}\r\nEMAIL:${employee.email}\r\n`;
 
     if (employee.mobileNumber) {
-      vCardLines.push(`TEL:${employee.mobileNumber}`);
+      vCard += `TEL;TYPE=CELL:${employee.mobileNumber}\r\n`;
     }
     if (employee.position) {
-      vCardLines.push(`TITLE:${employee.position}`);
+      vCard += `TITLE:${employee.position}\r\n`;
     }
     if (employee.department) {
-      vCardLines.push(`ORG:${employee.department}`);
+      vCard += `ORG:${employee.department}\r\n`;
     }
-    if (photoLine) {
-      vCardLines.push(photoLine);
+    if (photoData) {
+      // Use proper vCard 3.0 photo format with line folding (75 char lines)
+      const photoHeader = `PHOTO;ENCODING=b;TYPE=${photoData.type}:`;
+      const base64Lines = photoData.base64.match(/.{1,72}/g) || [];
+      vCard += photoHeader + base64Lines[0] + '\r\n';
+      for (let i = 1; i < base64Lines.length; i++) {
+        vCard += ' ' + base64Lines[i] + '\r\n';
+      }
     }
-    vCardLines.push('END:VCARD');
-
-    const vCard = vCardLines.join('\n');
+    vCard += 'END:VCARD';
 
     // Create blob and download
-    const blob = new Blob([vCard], { type: 'text/vcard' });
+    const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
